@@ -26,7 +26,7 @@ var R = {}; // the Recurrent library
     var u = 2 * Math.random() - 1;
     var v = 2 * Math.random() - 1;
     var r = u * u + v * v;
-    if (r == 0 || r > 1) return gaussRandom();
+    if (r === 0 || r > 1) return gaussRandom();
     var c = Math.sqrt(-2 * Math.log(r) / r);
     v_val = v * c; // cache this
     return_v = true;
@@ -105,8 +105,12 @@ var R = {}; // the Recurrent library
 
   // Transformer definitions
   var Graph = function (needs_backprop) {
-    if (typeof needs_backprop === 'undefined') { needs_backprop = true; }
-    this.needs_backprop = needs_backprop;
+    if (typeof needs_backprop === 'undefined') {
+      this.needs_backprop = true;
+    }
+    else {
+      this.needs_backprop = needs_backprop;
+    }
 
     // this will store a list of functions that perform backprop,
     // in their forward pass order. So in backprop we will go
@@ -268,9 +272,9 @@ var R = {}; // the Recurrent library
 
     var s = 0.0;
     for (var i = 0, n = m.w.length; i < n; i++) {
-        out.w[i] = Math.exp(m.w[i] - maxval);
-        s += out.w[i];
-      }
+      out.w[i] = Math.exp(m.w[i] - maxval);
+      s += out.w[i];
+    }
     for (var i = 0, n = m.w.length; i < n; i++) { out.w[i] /= s; }
 
       // no backward pass here needed
@@ -416,7 +420,7 @@ var R = {}; // the Recurrent library
     var output = G.add(G.mul(model['Whd'], hidden[hidden.length - 1]), model['bd']);
 
     // return cell memory, hidden representation and output
-    return { 'h':hidden, 'c':cell, 'o' : output };
+    return { h: hidden, c: cell, o: output };
   };
 
   var initRNN = function (input_size, hidden_sizes, output_size) {
@@ -443,7 +447,7 @@ var R = {}; // the Recurrent library
     // x is 1D column vector with observation
     // prev is a struct containing hidden activations from last step
 
-     if (typeof prev.h === 'undefined') {
+    if (typeof prev.h === 'undefined') {
       var hidden_prevs = [];
       for (var d = 0; d < hidden_sizes.length; d++) {
         hidden_prevs.push(new R.Mat(hidden_sizes[d], 1));
@@ -452,8 +456,8 @@ var R = {}; // the Recurrent library
       var hidden_prevs = prev.h;
     }
 
-     var hidden = [];
-     for (var d = 0; d < hidden_sizes.length; d++) {
+    var hidden = [];
+    for (var d = 0; d < hidden_sizes.length; d++) {
 
       var input_vector = d === 0 ? x : hidden[d - 1];
       var hidden_prev = hidden_prevs[d];
@@ -466,11 +470,11 @@ var R = {}; // the Recurrent library
     }
 
     // one decoder to outputs at end
-     var output = G.add(G.mul(model['Whd'], hidden[hidden.length - 1]), model['bd']);
+    var output = G.add(G.mul(model['Whd'], hidden[hidden.length - 1]), model['bd']);
 
     // return cell memory, hidden representation and output
-     return { 'h':hidden, 'o' : output };
-   };
+    return { h: hidden, o: output };
+  };
 
   var sig = function (x) {
     // helper function for computing sigmoid
@@ -502,7 +506,6 @@ var R = {}; // the Recurrent library
       if (x > r) { return i; }
       i++;
     }
-    return w.length - 1; // pretty sure we should never get here?
   };
 
   // various utils
@@ -524,5 +527,4 @@ var R = {}; // the Recurrent library
   // optimization
   global.Solver = Solver;
   global.Graph = Graph;
-
 })(R);

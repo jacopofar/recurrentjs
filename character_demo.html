@@ -84,7 +84,7 @@
   r.open("GET", "text_example.txt", true);
   r.onreadystatechange = function () {
     if (r.readyState != 4 || r.status != 200) return;
-    document.getElementById('tio').value = r.responseText;
+    document.getElementById('ti').value = r.responseText;
 //    alert("Success: " + r.responseText);
   };
   r.send();
@@ -592,9 +592,7 @@
       <div>
         You can save or load models with JSON using the textarea below.
       </div>
-      <textarea style="width:100%; height:200px;" id="tio">
-        text to be used when training the model, it will change
-      </textarea>
+      <textarea style="width:100%; height:200px;" id="tio"></textarea>
 
       <br>
       <div class="hh">Pretrained model:</div>
