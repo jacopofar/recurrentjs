@@ -17,7 +17,7 @@ var Rvis = (function (exports) {
     // canv is the canvas we wish to update with this new datapoint
     add: function (step, y) {
       var time = new Date().getTime(); // in ms
-      if (y> this.maxy * 0.99) this.maxy = y * 1.05;
+      if (y > this.maxy * 0.99) this.maxy = y * 1.05;
       if (y < this.miny * 1.01) this.miny = y * 0.95;
 
       this.pts.push({ step: step, time: time, y: y });
@@ -25,7 +25,6 @@ var Rvis = (function (exports) {
     },
     // elt is a canvas we wish to draw into
     drawSelf: function (canv) {
-
       var pad = 25;
       var H = canv.height;
       var W = canv.width;
@@ -64,7 +63,7 @@ var Rvis = (function (exports) {
       var t = function (x, y, s) {
         var tx = x / s.step_horizon * (W - pad * 2) + pad;
         var ty = H - ((y - s.miny) / (s.maxy - s.miny) * (H - pad * 2) + pad);
-        return { tx:tx, ty:ty };
+        return { tx: tx, ty: ty };
       };
 
       ctx.strokeStyle = 'red';
@@ -83,5 +82,4 @@ var Rvis = (function (exports) {
   exports = exports || {};
   exports.Graph = Graph;
   return exports;
-
-})(typeof module != 'undefined' && module.exports);  // add exports to module.exports if in node.js
+})(typeof module !== 'undefined' && module.exports);  // add exports to module.exports if in node.js
