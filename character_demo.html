@@ -82,7 +82,7 @@
 
   var r = new XMLHttpRequest();
   //sync request! it's not nice, but guarantees that the text will be loaded before running the script
-  r.open("GET", "text_example.txt", false);
+  r.open("GET", "text_example.txt", true);
   r.onreadystatechange = function () {
     if (r.readyState != 4 || r.status != 200) return;
     document.getElementById('ti').value = r.responseText;
