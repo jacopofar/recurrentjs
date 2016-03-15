@@ -85,7 +85,6 @@
   r.onreadystatechange = function () {
     if (r.readyState != 4 || r.status != 200) return;
     document.getElementById('ti').value = r.responseText;
-//    alert("Success: " + r.responseText);
   };
   r.send();
 
@@ -543,8 +542,8 @@
 
       // model parameters
       generator = 'lstm'; // can be 'rnn' or 'lstm'
-      hidden_sizes = [20,20]; // list of sizes of hidden layers
-      letter_size = 5; // size of letter embeddings
+      hidden_sizes = [50,50]; // list of sizes of hidden layers
+      letter_size = 10; // size of letter embeddings
 
       // optimization
       regc = 0.000001; // L2 regularization strength
