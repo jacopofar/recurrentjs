@@ -410,7 +410,7 @@
       $('#argmax').append(pred_div);
 
       // keep track of perplexity
-      $('#epoch').text('epoch: ' + (tick_iter/epoch_size).toFixed(2));
+      $('#epoch').text('epoch: ' + (tick_iter/epoch_size).toFixed(2) + ' ['+tick_iter+' of '+ epoch_size +']');
       $('#ppl').text('perplexity: ' + cost_struct.ppl.toFixed(2));
       $('#ticktime').text('forw/bwd time per example: ' + tick_time.toFixed(1) + 'ms');
 
@@ -543,7 +543,7 @@
 
       // model parameters
       generator = 'lstm'; // can be 'rnn' or 'lstm'
-      hidden_sizes = [50,50]; // list of sizes of hidden layers
+      hidden_sizes = [100,100,100]; // list of sizes of hidden layers
       letter_size = 10; // size of letter embeddings
 
       // optimization
