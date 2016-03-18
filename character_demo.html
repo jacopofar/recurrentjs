@@ -81,14 +81,6 @@
   <script type="text/javascript">
 
   var r = new XMLHttpRequest();
-  //sync request! it's not nice, but guarantees that the text will be loaded before running the script
-  r.open("GET", "text_example.txt", true);
-  r.onreadystatechange = function () {
-    if (r.readyState != 4 || r.status != 200) return;
-    document.getElementById('ti').value = r.responseText;
-  };
-  r.send();
-
   // prediction params
   var sample_softmax_temperature = 1.0; // how peaky model predictions should be
   var max_chars_gen = 100; // max length of generated sentences
@@ -455,6 +447,13 @@
 
   var iid = null;
   $(function() {
+    //sync request! it's not nice, but guarantees that the text will be loaded before running the script
+    r.open("GET", "text_example.txt", false);
+    r.onreadystatechange = function () {
+      if (r.readyState != 4 || r.status != 200) return;
+      document.getElementById('ti').value = r.responseText;
+    };
+    r.send();
 
     // attach button handlers
     $('#learn').click(function(){
