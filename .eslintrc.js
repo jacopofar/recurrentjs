@@ -3,6 +3,9 @@ module.exports = {
     'browser': true,
     'es6': true
   },
+  'globals': {
+    'R': true
+  },
   'extends': 'eslint:recommended',
   'rules': {
     'array-bracket-spacing': [2, 'never'],
