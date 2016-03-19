@@ -85,14 +85,14 @@
   //the text dataset
   let td = new TextDataset();
   //the graph visualizer
-  const pplGraph = new Rvis.Graph();
+  let pplGraph = new Rvis.Graph();
 
   // prediction params
   var sample_softmax_temperature = 1.0; // how peaky model predictions should be
 
   // model parameters
-  let generator = 'lstm'; // can be 'rnn' or 'lstm'
-  let hidden_sizes = [100,100]; // list of sizes of hidden layers
+  let generator = 'rnn'; // can be 'rnn' or 'lstm'
+  let hidden_sizes = [150,150]; // list of sizes of hidden layers
   let letter_size = 10; // size of letter embeddings
 
   // optimization
@@ -212,6 +212,8 @@
 
   var ppl_list = [];
   var tick_iter = 0;
+
+  var average_tick_time = -1;
   var tick = function() {
 
     // sample sentence fromd data
@@ -230,6 +232,13 @@
 
     var t1 = +new Date();
     var tick_time = t1 - t0;
+    if (average_tick_time === -1) {
+      average_tick_time = tick_time;
+    }
+    else{
+      //weighted average
+      average_tick_time = average_tick_time * 0.95 + tick_time * 0.05;
+    }
 
     ppl_list.push(cost_struct.ppl); // keep track of perplexity
 
@@ -254,7 +263,7 @@
       // keep track of perplexity
       $('#epoch').text('epoch: ' + (tick_iter/td.epoch_size).toFixed(2) + ' ['+tick_iter+' of '+ td.epoch_size +']');
       $('#ppl').text('perplexity: ' + cost_struct.ppl.toFixed(2));
-      $('#ticktime').text('forw/bwd time per example: ' + tick_time.toFixed(1) + 'ms');
+      $('#ticktime').text('forw/bwd time for latest example: ' + tick_time.toFixed(1) + 'ms average: '+average_tick_time.toFixed(2));
 
       if(tick_iter % 200 === 0) {
         var median_ppl = median(ppl_list);
@@ -395,7 +404,7 @@ NOTE currently not used
 
       // model parameters
       generator = 'lstm'; // can be 'rnn' or 'lstm'
-      hidden_sizes = [100,100]; // list of sizes of hidden layers
+      hidden_sizes = [150,150]; // list of sizes of hidden layers
       letter_size = 10; // size of letter embeddings
 
       // optimization
