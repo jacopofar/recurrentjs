@@ -2,7 +2,7 @@ const NNModel = function(generator, input_size, letter_size, hidden_sizes, outpu
   this.solver = new R.Solver(); // should be class because it needs memory for step caches
   this.model = {};
 
-  this.model['Wil'] = new R.RandMat(input_size, letter_size , 0, 0.08);
+  this.model['Wil'] = new R.RandMat(input_size, letter_size, 0, 0.08);
   const utilAddToModel = function (modelto, modelfrom) {
     for (var k in modelfrom) {
       if (modelfrom.hasOwnProperty(k)) {
@@ -82,7 +82,8 @@ const NNModel = function(generator, input_size, letter_size, hidden_sizes, outpu
     var G = new R.Graph(false);
     var s = '';
     var prev = {};
-    while(true) {
+    //generate sentences of at most 160 characters
+    for (let c = 0; c < 160; c++) {
       // RNN tick
       let ix = s.length === 0 ? 0 : td.letterToIndex[s[s.length - 1]];
       var lh = this.forwardIndex(G, ix, prev);
@@ -107,8 +108,7 @@ const NNModel = function(generator, input_size, letter_size, hidden_sizes, outpu
         ix = R.maxi(probs.w);
       }
 
-      if (ix === 0) break; // END token predicted, break out
-      if (s.length > 100) { return s; } //stop at 100 characters in any case
+      if (ix === 0) return s; // END token predicted, break out
       s += td.indexToLetter[ix];
     }
     return s;
