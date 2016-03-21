@@ -15,7 +15,8 @@ var Rvis = (function (exports) {
 
   Graph.prototype = {
     // canv is the canvas we wish to update with this new datapoint
-    add: function (step, y) {
+    add: function (step, y_original) {
+      let y = Math.log2(y_original);
       var time = new Date().getTime(); // in ms
       if (y > this.maxy * 0.99) this.maxy = y * 1.05;
       if (y < this.miny * 1.01) this.miny = y * 0.95;
@@ -41,7 +42,7 @@ var Rvis = (function (exports) {
       // draw guidelines and values
       ctx.strokeStyle = '#999';
       ctx.beginPath();
-      var ng = 10;
+      var ng = 15;
       for (var i = 0; i <= ng; i++) {
         var xpos = i / ng * (W - 2 * pad) + pad;
         ctx.moveTo(xpos, pad);
@@ -52,7 +53,7 @@ var Rvis = (function (exports) {
         var ypos = i / ng * (H - 2 * pad) + pad;
         ctx.moveTo(pad, ypos);
         ctx.lineTo(W - pad, ypos);
-        ctx.fillText(f2t((ng - i) / ng * (this.maxy - this.miny) + this.miny), 0, ypos);
+        ctx.fillText(f2t(Math.pow(2, (ng - i) / ng * (this.maxy - this.miny) + this.miny)), 0, ypos);
       }
       ctx.stroke();
 
