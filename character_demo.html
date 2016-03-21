@@ -92,7 +92,7 @@
 
   // model parameters
   let generator = 'rnn'; // can be 'rnn' or 'lstm'
-  let hidden_sizes = [150,150]; // list of sizes of hidden layers
+  let hidden_sizes = [200, 200]; // list of sizes of hidden layers
   let letter_size = 10; // size of letter embeddings
 
   // optimization
@@ -237,7 +237,7 @@
     }
     else{
       //weighted average
-      average_tick_time = average_tick_time * 0.95 + tick_time * 0.05;
+      average_tick_time = average_tick_time * 0.99 + tick_time * 0.01;
     }
 
     ppl_list.push(cost_struct.ppl); // keep track of perplexity
@@ -263,7 +263,7 @@
       // keep track of perplexity
       $('#epoch').text('epoch: ' + (tick_iter/td.epoch_size).toFixed(2) + ' ['+tick_iter+' of '+ td.epoch_size +']');
       $('#ppl').text('perplexity: ' + cost_struct.ppl.toFixed(2));
-      $('#ticktime').text('forw/bwd time for latest example: ' + tick_time.toFixed(1) + 'ms average: '+average_tick_time.toFixed(2));
+      $('#ticktime').text('forw/bwd time for latest example: ' + tick_time.toFixed(1) + ' ms average: '+average_tick_time.toFixed(2) + ' ms');
 
       if(tick_iter % 200 === 0) {
         var median_ppl = median(ppl_list);
@@ -404,7 +404,7 @@ NOTE currently not used
 
       // model parameters
       generator = 'lstm'; // can be 'rnn' or 'lstm'
-      hidden_sizes = [150,150]; // list of sizes of hidden layers
+      hidden_sizes = [200,200]; // list of sizes of hidden layers
       letter_size = 10; // size of letter embeddings
 
       // optimization
