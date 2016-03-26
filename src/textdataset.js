@@ -1,4 +1,5 @@
-const TextDataset = function(sents){
+'use strict';
+const TextDataset = function (sents) {
   this.epoch_size = -1;
   this.input_size = -1;
   this.output_size = -1;
@@ -48,7 +49,10 @@ const TextDataset = function(sents){
   };
 
   this.random_sentence = function () {
-    const sentix = R.randi(0, this.sents.length);
+    const sentix = Math.floor(Math.random() * this.sents.length);
     return this.sents[sentix];
   };
 };
+if (typeof module === 'object') {
+  module.exports = TextDataset;
+}
