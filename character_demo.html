@@ -65,6 +65,7 @@
   }
   #pplgraph {
     float: right;
+    padding-left: 3em;
   }
   #intro {
     text-align: justify;
@@ -74,8 +75,6 @@
 
   <script src="external/jquery-1.8.3.min.js"></script>
   <script src="external/jquery-ui.min.js"></script>
-
-  <script src="src/recurrent.js"></script>
   <script src="src/vis.js"></script>
   <script src="src/nnmodel.js"></script>
   <script src="src/textdataset.js"></script>
@@ -84,6 +83,7 @@
 
   //the text dataset
   let td = new TextDataset();
+
   //the graph visualizer
   let pplGraph = new Rvis.Graph();
 
@@ -92,7 +92,7 @@
 
   // model parameters
   let generator = 'rnn'; // can be 'rnn' or 'lstm'
-  let hidden_sizes = [200, 200]; // list of sizes of hidden layers
+  let hidden_sizes = [10, 10]; // list of sizes of hidden layers
   let letter_size = 10; // size of letter embeddings
 
   // optimization
@@ -171,38 +171,6 @@
 
 
 
-  var costfun = function(sent) {
-    // takes a model and a sentence and
-    // calculates the loss. Also returns the Graph
-    // object which can be used to do backprop
-    var n = sent.length;
-    var G = new R.Graph();
-    var log2ppl = 0.0;
-    var cost = 0.0;
-    var prev = {};
-    for(var i=-1;i<n;i++) {
-      // start and end tokens are zeros
-      var ix_source = i === -1 ? 0 : td.letterToIndex[sent[i]]; // first step: start with START token
-      var ix_target = i === n-1 ? 0 : td.letterToIndex[sent[i+1]]; // last step: end with END token
-
-      lh = nm.forwardIndex(G, ix_source, prev);
-      prev = lh;
-
-      // set gradients into logprobabilities
-      logprobs = lh.o; // interpret output as logprobs
-      probs = R.softmax(logprobs); // compute the softmax probabilities
-
-      log2ppl += -Math.log2(probs.w[ix_target]); // accumulate base 2 log prob and do smoothing
-      cost += -Math.log(probs.w[ix_target]);
-
-      // write gradients into log probabilities
-      logprobs.dw = probs.w;
-      logprobs.dw[ix_target] -= 1
-    }
-    var ppl = Math.pow(2, log2ppl / (n - 1));
-    return {'G':G, 'ppl':ppl, 'cost':cost};
-  }
-
   function median(values) {
     values.sort( function(a,b) {return a - b;} );
     var half = Math.floor(values.length/2);
@@ -214,6 +182,7 @@
   var tick_iter = 0;
 
   var average_tick_time = -1;
+
   var tick = function() {
 
     // sample sentence fromd data
@@ -222,13 +191,15 @@
     var t0 = +new Date();  // log start timestamp
 
     // evaluate cost function on a sentence
-    var cost_struct = costfun(sent);
+    var cost_struct = nm.costfun(sent, td.letterToIndex);
+    console.log('perplexity: ' + cost_struct.ppl + ' cost: ' + cost_struct.cost);
 
     // use built up graph to compute backprop (set .dw fields in mats)
     cost_struct.G.backward();
     // perform param update
     var solver_stats = nm.step(learning_rate, regc, clipval);
     //$("#gradclip").text('grad clipped ratio: ' + solver_stats.ratio_clipped)
+    console.log(solver_stats);
 
     var t1 = +new Date();
     var tick_time = t1 - t0;
@@ -239,7 +210,7 @@
       //weighted average
       average_tick_time = average_tick_time * 0.99 + tick_time * 0.01;
     }
-
+    console.log(learning_rate, regc, clipval);
     ppl_list.push(cost_struct.ppl); // keep track of perplexity
 
     // evaluate now and then
@@ -248,7 +219,7 @@
       // draw samples
       $('#samples').html('');
       for(var q=0;q<5;q++) {
-        var pred = nm.predictSentence(true, sample_softmax_temperature, td);
+        var pred = nm.predictSentence(true, sample_softmax_temperature, td.letterToIndex, td.indexToLetter);
         var pred_div = '<div class="apred">'+pred+'</div>'
         $('#samples').append(pred_div);
       }
@@ -256,14 +227,16 @@
     if(tick_iter % 10 === 0) {
       // draw argmax prediction
       $('#argmax').html('');
-      var pred = nm.predictSentence(false, sample_softmax_temperature, td);
+      var pred = nm.predictSentence(false, sample_softmax_temperature, td.letterToIndex, td.indexToLetter);
       var pred_div = '<div class="apred">'+pred+'</div>'
       $('#argmax').append(pred_div);
 
       // keep track of perplexity
       $('#epoch').text('epoch: ' + (tick_iter/td.epoch_size).toFixed(2) + ' ['+tick_iter+' of '+ td.epoch_size +']');
+
       $('#ppl').text('perplexity: ' + cost_struct.ppl.toFixed(2));
-      $('#ticktime').text('forw/bwd time for latest example: ' + tick_time.toFixed(1) + ' ms average: '+average_tick_time.toFixed(2) + ' ms');
+
+      $('#ticktime').text('forw/bwd time for latest example: ' + tick_time.toFixed(1) + ' ms average: ' + average_tick_time.toFixed(2) + ' ms');
 
       if(tick_iter % 200 === 0) {
         var median_ppl = median(ppl_list);
@@ -308,20 +281,17 @@ NOTE currently not used
 
   var iid = null;
   $(function() {
-    //sync request! it's not nice, but guarantees that the text will be loaded before running the script
-    var r = new XMLHttpRequest();
-    r.open("GET", "text_example.txt", false);
-    r.onreadystatechange = function () {
-      if (r.readyState != 4 || r.status != 200) return;
-      document.getElementById('ti').value = r.responseText;
-    };
-    r.send();
+
 
     // attach button handlers
     $('#learn').click(function(){
       reinit();
       if(iid !== null) { clearInterval(iid); }
-      iid = setInterval(tick, 0);
+      for(let tt = 0 ; tt < 30; tt++){
+        //console.log(tt);
+        tick();
+      }
+      //iid = setInterval(tick, 0);
     });
     $('#stop').click(function(){
       if(iid !== null) { clearInterval(iid); }
@@ -348,7 +318,17 @@ NOTE currently not used
       });
     });
 
-    $("#learn").click(); // simulate click on startup
+    var r = new XMLHttpRequest();
+    r.open("GET", "text_example.txt", true);
+    r.onreadystatechange = function () {
+      if (r.readyState != 4) return;
+      if(r.status !== 200) {
+        window.alert('error loading the input text. HTTP status ' + r.status + ' is text_example.txt available ? ' + r.readyState);
+      }
+      document.getElementById('ti').value = r.responseText;
+      $("#learn").click(); // simulate click on startup
+    };
+    r.send();
 
     //$('#gradcheck').click(gradCheck);
 
@@ -390,7 +370,7 @@ NOTE currently not used
     <div>
       <div class="hh">Input sentences:</div>
       <textarea style="width:100%; height:200px;" id="ti">
-
+        Waiting to load the text file...
       </textarea>
     </div>
     <div id="prepro_status"></div>
@@ -404,7 +384,7 @@ NOTE currently not used
 
       // model parameters
       generator = 'lstm'; // can be 'rnn' or 'lstm'
-      hidden_sizes = [200,200]; // list of sizes of hidden layers
+      hidden_sizes = [10, 10]; // list of sizes of hidden layers
       letter_size = 10; // size of letter embeddings
 
       // optimization
